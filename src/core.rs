@@ -13,6 +13,7 @@ pub mod map;
 pub mod map_constructor;
 pub mod map_pool;
 pub mod metadata;
+pub mod navigation;
 pub mod physics;
 pub mod player;
 pub mod random;

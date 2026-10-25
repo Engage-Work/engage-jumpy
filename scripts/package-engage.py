@@ -21,6 +21,7 @@ stage.mkdir()
 shutil.copy2(root / "target" / "release" / binary, stage / binary)
 for directory in ("assets", "licenses"):
     shutil.copytree(root / directory, stage / directory)
+shutil.copy2(root / "assets" / "ui" / "jumpy.icns", stage / "icon.icns")
 for name in ("LICENSE", "CREDITS.md", "README.md"):
     shutil.copy2(root / name, stage / name)
 name = f"jumpy-v{version}-{arch}-{system}"

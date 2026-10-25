@@ -1,6 +1,6 @@
 //! Player controller, states, and animation implementation.
 
-use std::collections::VecDeque;
+use super::navigation::{Motion, NavAgent};
 
 use crate::prelude::*;
 
@@ -350,58 +350,26 @@ impl PlayerCommand {
 
 #[derive(Clone, Debug, HasSchema)]
 pub struct AiPlayer {
-    movement_buffer: VecDeque<PlayerControl>,
-    control: PlayerControl,
+    #[schema(opaque)]
+    navigation: NavAgent,
     target_player: Option<Entity>,
-    decision_in: f32,
     retarget_in: f32,
     attack_in: f32,
-    last_pos: Option<Vec2>,
-    stuck_for: f32,
-    recovery_for: f32,
-    recovery_direction: f32,
 }
 
 impl Default for AiPlayer {
     fn default() -> Self {
         Self {
-            movement_buffer: default(),
-            control: default(),
+            navigation: default(),
             target_player: None,
-            decision_in: 0.0,
             retarget_in: 0.0,
             attack_in: 0.2,
-            last_pos: None,
-            stuck_for: 0.0,
-            recovery_for: 0.0,
-            recovery_direction: 1.0,
         }
     }
 }
 
-// The sword's damage regions extend 35–45 pixels forward and above the fish.
 fn ai_in_sword_range(offset: Vec2) -> bool {
     offset.x.abs() <= 38.0 && (-24.0..=42.0).contains(&offset.y)
-}
-
-fn ai_track_progress(ai: &mut AiPlayer, pos: Vec2, dt: f32) -> bool {
-    if ai.control.move_direction != Vec2::ZERO
-        && ai
-            .last_pos
-            .is_some_and(|last| last.distance_squared(pos) < 0.25)
-    {
-        ai.stuck_for += dt;
-    } else {
-        ai.stuck_for = 0.0;
-    }
-    ai.last_pos = Some(pos);
-    if ai.stuck_for >= 0.35 {
-        ai.stuck_for = 0.0;
-        ai.movement_buffer.clear();
-        ai.decision_in = 0.0;
-        return true;
-    }
-    false
 }
 
 #[derive(Debug, HasSchema, Clone)]
@@ -463,10 +431,8 @@ fn player_ai_system(
             continue;
         };
         let ai_pos = transform.translation.truncate();
-        ai.decision_in -= dt;
         ai.retarget_in -= dt;
         ai.attack_in -= dt;
-        ai.recovery_for = (ai.recovery_for - dt).max(0.0);
 
         if ai.retarget_in <= 0.0
             || ai
@@ -490,119 +456,38 @@ fn player_ai_system(
                 })
                 .map(|(ent, _)| ent);
             ai.retarget_in = 0.45 + rng.f32() * 0.35;
-            ai.decision_in = 0.0;
         }
         let Some(target) = ai.target_player else {
-            ai.control = default();
-            ai.movement_buffer.clear();
+            ai.navigation = default();
             continue;
         };
         let target_pos = transforms.get(target).unwrap().translation.truncate();
         let offset = target_pos - ai_pos;
         let direction = if offset.x < 0.0 { -1.0 } else { 1.0 };
-        let current_node = NavNode((ai_pos / map.tile_size).floor().as_ivec2());
-
-        if ai_track_progress(ai, ai_pos, dt) && body.is_on_ground {
-            // Back out of a failed approach before trying another jump.
-            ai.recovery_direction = if rng.chance(0.65) {
-                -direction
-            } else {
-                direction
-            };
-            ai.recovery_for = 0.22 + rng.f32() * 0.12;
-        }
-
-        let was_jumping = ai.control.jump_pressed;
-        let mut control = if let Some(control) = ai.movement_buffer.pop_front() {
-            control
-        } else if ai.decision_in <= 0.0 {
-            ai.decision_in = 0.10 + rng.f32() * 0.06;
-            // A short lead helps intercept moving players without chasing stale positions.
-            let velocity = bodies.get(target).map_or(Vec2::ZERO, |body| body.velocity);
-            let predicted = target_pos + (velocity * 0.12).clamp_length_max(map.tile_size.x);
-            let predicted_node = NavNode((predicted / map.tile_size).floor().as_ivec2());
-            let actual_node = NavNode((target_pos / map.tile_size).floor().as_ivec2());
-            let target_node = if nav_graph.contains_node(predicted_node) {
-                predicted_node
-            } else {
-                actual_node
-            };
-            let path = petgraph::algo::astar(
-                nav_graph.as_ref(),
-                current_node,
-                |x| x == target_node,
-                |(_, _, edge)| edge.distance,
-                |_| 0.0,
-            );
-            let mut planned = PlayerControl::default();
-            if let Some((_, path)) = path {
-                if debug_settings.show_pathfinding_lines {
-                    paths.insert(
-                        pathfinding_debug_line.entities[player_idx.0 as usize],
-                        Path2d {
-                            points: path
-                                .iter()
-                                .map(|x| x.0.as_vec2() * map.tile_size + map.tile_size / 2.0)
-                                .collect(),
-                            thickness: 2.0,
-                            color: PLAYER_COLORS[player_idx.0 as usize],
-                            ..default()
-                        },
-                    );
-                }
-                if let Some(&next) = path.get(1) {
-                    ai.movement_buffer = nav_graph
-                        .edge_weight(current_node, next)
-                        .unwrap()
-                        .inputs
-                        .clone();
-                    planned = ai.movement_buffer.pop_front().unwrap_or_default();
-                    // A fish can overlap the ledge even after its center enters the falling tile.
-                    if body.is_on_ground
-                        && next.y < current_node.y
-                        && planned.move_direction == Vec2::ZERO
-                    {
-                        let destination = path.get(2).unwrap_or(&next);
-                        planned.move_direction.x = if destination.x < current_node.x {
-                            -1.0
-                        } else {
-                            direction
-                        };
-                    }
-                }
-            } else {
-                // Recover even when an airborne target has no route in the tile graph.
-                planned.move_direction.x = direction;
-                planned.jump_pressed = body.is_on_ground && offset.y > map.tile_size.y * 0.5;
-                planned.jump_just_pressed = planned.jump_pressed;
-            }
-            planned
-        } else {
-            let mut control = ai.control;
-            control.jump_just_pressed = false;
-            control
+        let motion = Motion {
+            pos: ai_pos,
+            velocity: body.velocity,
+            grounded: body.is_on_ground,
         };
-
-        if ai.recovery_for > 0.0 {
-            control.move_direction = vec2(ai.recovery_direction, 0.0);
-            control.jump_pressed = body.is_on_ground || was_jumping;
-            control.jump_just_pressed = body.is_on_ground && !was_jumping;
-        } else if body.is_on_ground && ai_in_sword_range(offset) {
-            // Keep facing the opponent while closing the last few pixels.
-            control.move_direction = vec2(direction * 0.35, 0.0);
-            control.jump_pressed = false;
-            control.jump_just_pressed = false;
-            ai.movement_buffer.clear();
+        let velocity = bodies.get(target).map_or(Vec2::ZERO, |body| body.velocity);
+        let target_pos_for_navigation =
+            target_pos + (velocity * 0.12).clamp_length_max(map.tile_size.x);
+        let mut control =
+            ai.navigation
+                .control(&nav_graph.0, motion, target_pos_for_navigation, dt);
+        // Only close for melee when there is no wall between the fish. Keep the route's jumps.
+        let clear_attack = ai_in_sword_range(offset)
+            && (1..=4).all(|step| !collision_world.solid_at(ai_pos + offset * (step as f32 / 5.0)));
+        if body.is_on_ground && clear_attack && !control.jump_pressed {
+            control.move_direction.x = direction * 0.35;
         }
-        control.jump_just_pressed &= !was_jumping || body.is_on_ground;
         control.moving = control.move_direction.length_squared() > 0.01;
         control.shoot_pressed = false;
         control.shoot_just_pressed = false;
 
         // Combat runs every frame, including during buffered jumps and recovery.
         if ai.attack_in <= 0.0
-            && ai_in_sword_range(offset)
-            && (1..=4).all(|step| !collision_world.solid_at(ai_pos + offset * (step as f32 / 5.0)))
+            && clear_attack
             && (control.move_direction.x == 0.0 || control.move_direction.x.signum() == direction)
         {
             if let Some(sprite) = sprites.get_mut(ai_ent) {
@@ -612,9 +497,20 @@ fn player_ai_system(
             control.shoot_just_pressed = true;
             ai.attack_in = 0.25 + rng.f32() * 0.25;
         }
-        ai.control = control;
         *output = control;
-        if !debug_settings.show_pathfinding_lines {
+        if debug_settings.show_pathfinding_lines {
+            if let Some(destination) = ai.navigation.destination(&nav_graph.0) {
+                paths.insert(
+                    pathfinding_debug_line.entities[player_idx.0 as usize],
+                    Path2d {
+                        points: vec![ai_pos, destination],
+                        thickness: 2.0,
+                        color: PLAYER_COLORS[player_idx.0 as usize],
+                        ..default()
+                    },
+                );
+            }
+        } else {
             paths.remove(pathfinding_debug_line.entities[player_idx.0 as usize]);
         }
     }
@@ -625,7 +521,7 @@ mod ai_tests {
     use super::*;
 
     #[test]
-    fn buffered_jumps_do_not_suppress_attacks_or_repeat_them_next_frame() {
+    fn combat_remains_independent_of_navigation_and_clears_dead_player_input() {
         let mut world = World::default();
         world.insert_resource(LoadedMap(Arc::new(MapMeta {
             grid_size: uvec2(20, 20),
@@ -651,17 +547,12 @@ mod ai_tests {
                 bodies.insert(ai_ent, KinematicBody::default());
                 bodies.insert(target, KinematicBody::default());
                 sprites.insert(ai_ent, AtlasSprite::default());
-                let mut ai = AiPlayer {
+                let ai = AiPlayer {
                     target_player: Some(target),
                     retarget_in: 1.0,
                     attack_in: 0.0,
                     ..default()
                 };
-                ai.movement_buffer.push_back(PlayerControl {
-                    move_direction: Vec2::X,
-                    jump_pressed: true,
-                    ..default()
-                });
                 ais.insert(ai_ent, ai);
                 ai_ent
             },
@@ -669,7 +560,6 @@ mod ai_tests {
         );
         world.run_system(player_ai_system, ());
         let control = world.resource::<MatchInputs>().players[0].control;
-        assert!(control.jump_pressed);
         assert!(control.shoot_pressed);
         assert!(control.shoot_just_pressed);
         assert!(
@@ -708,21 +598,6 @@ mod ai_tests {
         assert!(ai_in_sword_range(vec2(-32.0, -16.0)));
         assert!(!ai_in_sword_range(vec2(80.0, 0.0)));
         assert!(!ai_in_sword_range(vec2(5.0, 80.0)));
-    }
-
-    #[test]
-    fn stuck_navigation_discards_failed_movement_and_replans() {
-        let mut ai = AiPlayer::default();
-        ai.control.move_direction = Vec2::X;
-        ai.movement_buffer.push_back(ai.control);
-        ai.decision_in = 1.0;
-        assert!(!ai_track_progress(&mut ai, Vec2::ZERO, 0.2));
-        assert!(!ai_track_progress(&mut ai, Vec2::ZERO, 0.2));
-        assert!(ai_track_progress(&mut ai, Vec2::ZERO, 0.2));
-        assert!(ai.movement_buffer.is_empty());
-        assert_eq!(ai.decision_in, 0.0);
-        assert!(!ai_track_progress(&mut ai, Vec2::X * 8.0, 0.2));
-        assert_eq!(ai.stuck_for, 0.0);
     }
 }
 

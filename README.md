@@ -6,9 +6,14 @@ Player one uses **WASD** to move, **Space** to jump, **J** to fire/use a weapon,
 **K** to grab/throw, **L** to slide, and **F** to ragdoll. Bindings can be changed
 in Settings → Controls. Gamepads and the second keyboard player's bindings are unchanged.
 
-Bots can attack while jumping, use their sword's reach, retarget living opponents,
-lead moving targets, and recover from blocked ledges. Offline matches use a fresh random seed;
-online simulation keeps the shared deterministic seed needed for synchronization.
+Bots navigate between standable surfaces using full-body Rapier collision checks and the
+shipped fish movement stats. They commit to jumps until landing, align launch positions with
+wall clearance, drop through platforms, and avoid repeatedly attempting a failed transition.
+Navigation follows the [surface-and-trajectory approach used by Surfacer](https://github.com/SnoringCatGames/surfacer), implemented for Jumpy's physics.
+
+Bots can attack while moving and retarget living opponents. Offline matches use a fresh random
+seed; online simulation keeps its deterministic seed. The native Mac build includes Finder
+and Dock icons using the existing Fish Folk artwork.
 
 This fork stores settings separately under `org.engage-work.jumpy`, so the new defaults
 apply immediately and the original game's settings remain available.

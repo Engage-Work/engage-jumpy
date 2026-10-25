@@ -40,7 +40,6 @@ fn hydrate(
     mut bodies: CompMut<KinematicBody>,
     mut nav_graph: ResMutInit<NavGraph>,
     transforms: Comp<Transform>,
-    map: Res<LoadedMap>,
 ) {
     let mut not_hydrated_bitset = hydrated.bitset().clone();
     not_hydrated_bitset.bit_not();
@@ -70,25 +69,17 @@ fn hydrate(
         }
     }
 
-    // Update the navigation graph with the new sproingers
     if !new_sproingers.is_empty() {
-        let mut new_graph = nav_graph.as_ref().clone();
-
+        let navigation = Arc::make_mut(&mut nav_graph.0);
         for ent in new_sproingers {
-            let pos = transforms.get(ent).unwrap().translation;
-            let node = NavNode((pos.truncate() / map.tile_size).as_ivec2());
-            let sproing_to = node.above().above().above().above().above().above();
-
-            new_graph.add_edge(
-                node,
-                sproing_to,
-                NavGraphEdge {
-                    inputs: [PlayerControl::default()].into(),
-                    distance: node.distance(&sproing_to),
-                },
+            let element = assets.get(element_handles.get(ent).unwrap().0);
+            let meta = assets.get(element.data);
+            let meta = meta.cast_ref::<SproingerMeta>();
+            navigation.add_spring(
+                transforms.get(ent).unwrap().translation.truncate(),
+                meta.spring_velocity,
             );
         }
-        **nav_graph = Arc::new(new_graph);
     }
 }
 

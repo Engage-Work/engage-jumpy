@@ -12,6 +12,7 @@
 use bones_bevy_renderer::BonesBevyRenderer;
 use bones_framework::prelude::*;
 
+mod app_icon;
 pub mod audio;
 pub mod core;
 pub mod debug;
@@ -213,6 +214,7 @@ fn main() {
         preload: true,
     }
     .app()
+    .add_systems(bones_bevy_renderer::bevy::app::Startup, app_icon::set_icon)
     .run();
 }
 
