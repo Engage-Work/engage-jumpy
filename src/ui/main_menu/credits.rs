@@ -157,3 +157,23 @@ pub fn widget(
             });
         });
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shipped_credits_open_with_the_edition_attribution() {
+        let credits = credits_parser::credits(CREDITS_STR).expect("shipped credits must parse");
+        let edition = credits
+            .sections
+            .iter()
+            .find(|section| section.title == "Detroit Showdown edition")
+            .unwrap();
+        assert_eq!(edition.entries.len(), 3);
+        assert!(
+            credits.sections.len() > 1,
+            "upstream credits must be retained"
+        );
+    }
+}

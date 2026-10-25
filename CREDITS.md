@@ -66,4 +66,6 @@
 
 ## Detroit Showdown edition
 
-Original Pip, Rivet, Leon and Verse character concepts and animation atlases, Detroit title artwork, Detroit Riverfront, Eastern Market and Belle Isle scenery: OpenAI Image Generation for Engage. Original Detroit arcade sound cues: Engage (synthesized, no sampled music or voice). Native edition and Code integration: Engage. Based on Jumpy by Fish Folk and Spicy Lobster; all upstream credits and licenses above remain in effect.
+- OpenAI Image Generation - Original Pip, Rivet, Leon and Verse animation art, Detroit title, Riverfront, Eastern Market and Belle Isle scenery for Engage
+- Engage - Native edition, Code integration and original synthesized arcade cues, with no sampled music or voice
+- Fish Folk and Spicy Lobster - Jumpy foundation; upstream credits and licenses remain in effect
