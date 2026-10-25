@@ -2,11 +2,11 @@ name: Leon
 bot_personality: Balanced
 
 sounds:
-  jump: /audio/detroit/leon-jump.wav
+  jump: /audio/detroit/leon-jump.ogg
   jump_volume: 0.05
-  land: /audio/detroit/land.wav
+  land: /audio/detroit/land.ogg
   land_volume: 0.025
-  grab: /audio/detroit/grab.wav
+  grab: /audio/detroit/grab.ogg
   grab_volume: 0.05
   drop: ../../sounds/drop.ogg
   drop_volume: 0.05

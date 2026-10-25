@@ -26,7 +26,7 @@ main_menu:
   title_image:
     image: ui/detroit-title.png
     image_size: [1774, 887]
-  confirm_sound: audio/detroit/welcome.wav
+  confirm_sound: audio/detroit/welcome.ogg
   background_scale: 0.536
   background_image:
     image: map/resources/detroit-riverfront.png
