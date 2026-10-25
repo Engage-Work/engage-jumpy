@@ -420,6 +420,9 @@ pub struct NavAgent {
 }
 
 impl NavAgent {
+    pub fn is_busy(&self) -> bool {
+        self.active.is_some()
+    }
     pub fn destination(&self, nav: &Navigation) -> Option<Vec2> {
         self.active.as_ref().map(|active| nav.positions[&active.to])
     }

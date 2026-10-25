@@ -30,3 +30,23 @@ volume-effects = Effects
 graphics = Graphics
 fullscreen = Fullscreen
 no-graphics-settings-on-web = There are no graphics settings on web.
+
+# Local bot settings
+gameplay = Gameplay
+bot-difficulty = Bot difficulty
+bot-personality = Bot personalities
+bot-easy = Easy
+bot-hard = Hard
+bot-mixed = Mixed
+bot-balanced = Balanced
+bot-aggressive = Aggressive
+bot-cautious = Cautious
+bot-playful = Playful
+bot-easy-help = More time to react, fewer attacks, and more mistakes.
+bot-hard-help = Faster reactions, accurate attacks, and stronger pursuit.
+bot-mixed-help = Each bot gets its own personality.
+bot-balanced-help = Pursues opponents with occasional hesitation.
+bot-aggressive-help = Rushes into fights and attacks more often.
+bot-cautious-help = Sometimes backs away to make space before engaging.
+bot-playful-help = Gets distracted and explores instead of always chasing.
+bot-local-help = Applies to local bots. Reset restores this game's defaults.
