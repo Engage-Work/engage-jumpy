@@ -27,4 +27,5 @@ rm -rf $dist_dir
 mkdir -p $dist_dir
 wasm-bindgen --out-dir $dist_dir --target web --no-typescript $target_dir/$target/$build_kind/jumpy.wasm
 cp wasm_resources/index.html $dist_dir/index.html
+cp wasm_resources/touch-controls.js $dist_dir/touch-controls.js
 cp -r assets $dist_dir

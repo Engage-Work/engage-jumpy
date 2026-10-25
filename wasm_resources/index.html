@@ -1,6 +1,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Detroit Showdown</title>
     <style>
       body {
         margin: 0;
@@ -67,7 +69,7 @@
     <div class="loading-container">
       <div>
         <div class="lds-dual-ring"></div>
-        <div class="loading-text">Loading game...</div>
+        <div class="loading-text">Loading Detroit Showdown...</div>
       </div>
     </div>
     <script>
@@ -76,6 +78,31 @@
       (function () {
         // An array of all contexts to resume on the page
         const audioContextList = [];
+        const volumes = [];
+        let engageMuted = new URLSearchParams(location.search).has("mute");
+        // Engage's game screen calls this, so the sound toggle never reloads the game.
+        window.engageSetMuted = (muted) => {
+          engageMuted = muted;
+          for (const volume of volumes) volume.gain.value = muted ? 0 : 1;
+        };
+
+        // Engage serves the game as a sandboxed page with an opaque origin, where localStorage
+        // throws. The engine keeps its settings there, so give it one that lasts this session.
+        try {
+          window.localStorage.length;
+        } catch {
+          const items = new Map();
+          Object.defineProperty(window, "localStorage", {
+            value: {
+              get length() { return items.size; },
+              key: (index) => [...items.keys()][index] ?? null,
+              getItem: (key) => (items.has(key) ? items.get(key) : null),
+              setItem: (key, value) => void items.set(key, String(value)),
+              removeItem: (key) => void items.delete(key),
+              clear: () => items.clear(),
+            },
+          });
+        }
 
         // An array of various user interaction events we should listen for
         const userInputEventNames = [
@@ -97,6 +124,12 @@
           construct(target, args) {
             const result = new target(...args);
             audioContextList.push(result);
+            // The engine resumes audio itself, so muting routes everything through a gain set to zero.
+            const volume = result.createGain();
+            volume.gain.value = engageMuted ? 0 : 1;
+            volume.connect(result.destination);
+            Object.defineProperty(result, "destination", { value: volume });
+            volumes.push(volume);
             return result;
           },
         });
@@ -145,5 +178,6 @@
       };
       setTimeout(ignoreCanvasContextMenu, 1000)
     </script>
+    <script type="module" src="./touch-controls.js"></script>
   </body>
 </html>

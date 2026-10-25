@@ -19,6 +19,10 @@ build-web basepath='':
 build-release-web basepath='':
     ./scripts/build-web.sh release
 
+# Stages the browser release in an Engage server's T3 home, e.g. `just engage-web ~/.t3`.
+engage-web t3home='':
+    ./scripts/build-engage-web.sh '{{t3home}}'
+
 docs:
     RUSTDOCFLAGS="--html-in-header docs/rustdoc-mermaid-head.html" \
     cargo +nightly doc --document-private-items --workspace --no-deps
