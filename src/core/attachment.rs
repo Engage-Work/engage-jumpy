@@ -125,6 +125,7 @@ pub fn update_attachments(
     attachments: Comp<Attachment>,
     mut attachment_easings: CompMut<AttachmentEasing>,
     invincibles: Comp<Invincibility>,
+    player_indexes: Comp<PlayerIdx>,
     mut transforms: CompMut<Transform>,
     mut atlas_sprites: CompMut<AtlasSprite>,
 ) {
@@ -153,6 +154,11 @@ pub fn update_attachments(
             // Copy transform values except for rotation
             transform.translation = attached_transform.translation;
             transform.scale = attached_transform.scale;
+        }
+
+        // Player render scaling belongs to the body atlas, not weapons, hats or effects.
+        if player_indexes.contains(attachment.entity) {
+            transform.scale = Vec3::ONE;
         }
 
         if attachment.sync_flip {

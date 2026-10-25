@@ -63,3 +63,7 @@
 - [Bevy](https://bevyengine.org/)
 - [Bones](https://github.com/fishfolk/bones)
 - [rust-lang.org](https://www.rust-lang.org/)
+
+## Detroit Showdown edition
+
+Original Pip and Rivet character concepts, animation atlases and Detroit Riverfront artwork: OpenAI Image Generation for Engage. Native edition and Code integration: Engage. Based on Jumpy by Fish Folk and Spicy Lobster; all upstream credits and licenses above remain in effect.

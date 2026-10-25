@@ -678,6 +678,13 @@ fn hydrate_players(
             last_animation: default(),
         };
 
+        // Concept atlases can use larger cells without changing the physical fighter.
+        let render_scale = if meta.render_scale > 0.0 {
+            meta.render_scale
+        } else {
+            1.0
+        };
+        transforms.get_mut(player_entity).unwrap().scale = vec3(render_scale, render_scale, 1.0);
         player_states.insert(player_entity, default());
         emote_states.insert(player_entity, default());
         animation_bank_sprites.insert(player_entity, animation_bank_sprite);

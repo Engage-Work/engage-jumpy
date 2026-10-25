@@ -137,8 +137,21 @@ pub struct GameMusic {
 }
 
 fn main() {
+    // Finder doesn't start an app in its resource folder; project launches already use the remix.
+    if let Ok(executable) = std::env::current_exe() {
+        if let Some(macos) = executable.parent() {
+            if macos.file_name().is_some_and(|name| name == "MacOS") {
+                if let Some(contents) = macos.parent() {
+                    let resources = contents.join("Resources");
+                    if resources.join("assets").is_dir() {
+                        std::env::set_current_dir(resources).expect("open game resources");
+                    }
+                }
+            }
+        }
+    }
     // Init logging
-    setup_logs!("org", "fishfolk", "jumpy");
+    setup_logs!("org", "engage-work", "detroit-showdown");
 
     // Initialize the Bevy task pool manually so that we can use it during startup.
     bevy_tasks::IoTaskPool::init(bevy_tasks::TaskPool::new);
@@ -203,7 +216,11 @@ fn main() {
             env!("CARGO_PKG_VERSION_MINOR").parse().unwrap(),
             env!("CARGO_PKG_VERSION_PATCH").parse().unwrap(),
         ),
-        app_namespace: ("org".into(), "engage-work".into(), "jumpy".into()),
+        app_namespace: (
+            "org".into(),
+            "engage-work".into(),
+            "detroit-showdown".into(),
+        ),
         asset_dir: std::env::var("JUMPY_ASSETS")
             .unwrap_or_else(|_| "assets".into())
             .into(),
@@ -214,7 +231,10 @@ fn main() {
         preload: true,
     }
     .app()
-    .add_systems(bones_bevy_renderer::bevy::app::Startup, app_icon::set_icon)
+    .add_systems(
+        bones_bevy_renderer::bevy::app::Startup,
+        (app_icon::set_icon, set_edition_title),
+    )
     .run();
 }
 
@@ -270,4 +290,14 @@ fn load_progress(assets: &AssetServer, ctx: &egui::Context) {
                 d.insert_temp(ui.id(), (spinner_size, space_size, text_size));
             })
         });
+}
+
+fn set_edition_title(
+    mut windows: bones_bevy_renderer::bevy::prelude::Query<
+        &mut bones_bevy_renderer::bevy::window::Window,
+    >,
+) {
+    for mut window in &mut windows {
+        window.title = "Detroit Showdown".into();
+    }
 }

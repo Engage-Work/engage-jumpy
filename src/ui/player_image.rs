@@ -57,7 +57,13 @@ pub fn player_image(
         ui.painter().add(mesh);
 
         body_rect = rect;
-        body_scale = width / atlas.tile_size.x;
+        body_scale = width
+            / atlas.tile_size.x
+            / if player_meta.render_scale > 0.0 {
+                player_meta.render_scale
+            } else {
+                1.0
+            };
     }
 
     // Render the fin & face animation

@@ -20,6 +20,7 @@ pub struct MainMenuMeta {
     pub title_font: FontMeta,
     pub subtitle_font: FontMeta,
     pub background_image: ImageMeta,
+    pub background_scale: f32,
     pub menu_width: f32,
 }
 
@@ -49,11 +50,19 @@ fn setup_menu(
         let ent = entities.create();
         transforms.insert(
             ent,
-            Transform::from_translation(vec3(
-                meta.main_menu.background_image.image_size.x * i as f32,
-                0.,
-                0.,
-            )),
+            Transform {
+                translation: vec3(
+                    meta.main_menu.background_image.image_size.x * i as f32,
+                    0.,
+                    0.,
+                ),
+                scale: Vec3::splat(if meta.main_menu.background_scale > 0.0 {
+                    meta.main_menu.background_scale
+                } else {
+                    1.0
+                }),
+                ..default()
+            },
         );
         sprites.insert(
             ent,

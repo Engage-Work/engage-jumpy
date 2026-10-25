@@ -1,3 +1,15 @@
+# Detroit Showdown
+
+A native arena game built with Engage on the Jumpy engine. Select Pip the brass-helmet courier or Rivet the workshop robot in a Detroit D cap, and play Detroit Riverfront against friends or AI opponents.
+
+Build with `cargo build --release --locked`. Run the executable beside the `assets` folder. The macOS app bundle keeps its assets in Contents/Resources and opens directly from Finder.
+
+Choose **Local Game**, press **Space** to join, pick a character with **A/D**, press **Space** to confirm, and add an AI opponent. Continue to select **Detroit Riverfront**. Player one: **A/D** move, **Space** jump, **K** grab/drop, **J** shoot, **L** slide, **F** ragdoll. **Escape** pauses. **F11** switches fullscreen. Controllers are supported.
+
+Original Detroit artwork and Pip/Rivet animation sheets were created with OpenAI Image Generation. The game retains Fish Folk and Spicy Lobster's code, art, audio, credits and licenses. Included Fish Folk media remain CC BY-NC-4.0, so this edition is distributed for noncommercial use.
+
+---
+
 # Engage Jumpy
 
 Maintained by Engage Work, based on Fish Folk Jumpy v0.12.2. Our maintained branch is `engage`.

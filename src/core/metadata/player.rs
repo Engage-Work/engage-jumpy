@@ -5,6 +5,7 @@ use super::*;
 #[repr(C)]
 pub struct PlayerMeta {
     pub name: Ustr,
+    pub render_scale: f32,
     pub body_size: Vec2,
     pub slide_body_size: Vec2,
     pub gravity: f32,

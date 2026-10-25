@@ -23,9 +23,10 @@ main_menu:
     color: FFFFFF
     size: 60
 
+  background_scale: 0.536
   background_image:
-    image: ui/menu-background.png
-    image_size: [896, 480]
+    image: map/resources/detroit-riverfront.png
+    image_size: [896, 504]
 
   menu_width: 350
 
@@ -288,6 +289,8 @@ core:
       ragdoll_additional_mass: 300
 
   players:
+    - ./player/skins/rivet/rivet.player.yaml
+    - ./player/skins/pip/pip.player.yaml
     - ./player/skins/fishy/fishy.player.yaml
     - ./player/skins/pescy/pescy.player.yaml
     - ./player/skins/sharky/sharky.player.yaml
@@ -320,6 +323,7 @@ core:
   player_win_indicator: /effects/win_indicator/win_indicator.yaml
 
   stable_maps:
+    - /map/levels/detroit-riverfront.map.yaml
     - /map/levels/level_1.map.yaml
     - /map/levels/level_2.map.yaml
     - /map/levels/level_3.map.yaml

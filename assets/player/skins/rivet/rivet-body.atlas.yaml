@@ -1,0 +1,4 @@
+image: ./rivet-body.png
+tile_size: [256, 256]
+columns: 6
+rows: 4

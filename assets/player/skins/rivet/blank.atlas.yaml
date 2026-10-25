@@ -1,0 +1,4 @@
+image: ./blank.png
+tile_size: [1, 1]
+columns: 1
+rows: 1

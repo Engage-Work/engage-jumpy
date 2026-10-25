@@ -1,2 +1,2 @@
-title = Fish Folk
-subtitle = Jumpy
+title = DETROIT
+subtitle = SHOWDOWN
