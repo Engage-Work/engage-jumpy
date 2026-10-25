@@ -354,7 +354,9 @@ pub struct AiPlayer {
     navigation: NavAgent,
     target_player: Option<Entity>,
     retarget_in: f32,
-    attack_in: f32,
+    #[schema(opaque)]
+    brain: BotBrain,
+    character_personality: BotPersonality,
 }
 
 impl Default for AiPlayer {
@@ -363,7 +365,8 @@ impl Default for AiPlayer {
             navigation: default(),
             target_player: None,
             retarget_in: 0.0,
-            attack_in: 0.2,
+            brain: default(),
+            character_personality: BotPersonality::Mixed,
         }
     }
 }
@@ -407,7 +410,6 @@ fn player_ai_system(
     mut ai_players: CompMut<AiPlayer>,
     player_indexes: Comp<PlayerIdx>,
     killed: Comp<PlayerKilled>,
-    map: Res<LoadedMap>,
     transforms: Comp<Transform>,
     pathfinding_debug_line: ResMutInit<PathfindingDebugLines>,
     mut paths: CompMut<Path2d>,
@@ -415,6 +417,7 @@ fn player_ai_system(
     mut sprites: CompMut<AtlasSprite>,
     collision_world: CollisionWorld,
     debug_settings: ResInit<DebugSettings>,
+    bot_settings: ResInit<BotSettings>,
     rng: Res<GlobalRng>,
     time: Res<Time>,
 ) {
@@ -432,7 +435,8 @@ fn player_ai_system(
         };
         let ai_pos = transform.translation.truncate();
         ai.retarget_in -= dt;
-        ai.attack_in -= dt;
+        ai.brain
+            .prepare(*bot_settings, ai.character_personality, &rng);
 
         if ai.retarget_in <= 0.0
             || ai
@@ -455,7 +459,7 @@ fn player_ai_system(
                     score(*a, ta).total_cmp(&score(*b, tb))
                 })
                 .map(|(ent, _)| ent);
-            ai.retarget_in = 0.45 + rng.f32() * 0.35;
+            ai.retarget_in = bot_settings.decision_seconds() * (1.0 + rng.f32() * 0.5);
         }
         let Some(target) = ai.target_player else {
             ai.navigation = default();
@@ -470,15 +474,28 @@ fn player_ai_system(
             grounded: body.is_on_ground,
         };
         let velocity = bodies.get(target).map_or(Vec2::ZERO, |body| body.velocity);
-        let target_pos_for_navigation =
-            target_pos + (velocity * 0.12).clamp_length_max(map.tile_size.x);
-        let mut control =
-            ai.navigation
-                .control(&nav_graph.0, motion, target_pos_for_navigation, dt);
+        let safe_to_pause = body.is_on_ground && !ai.navigation.is_busy();
+        let goal = ai.brain.navigation_goal(
+            *bot_settings,
+            ai_pos,
+            target_pos,
+            velocity,
+            safe_to_pause,
+            dt,
+            &rng,
+        );
+        let mut control = match goal {
+            Some(goal) => ai.navigation.control(&nav_graph.0, motion, goal, dt),
+            None => PlayerControl::default(),
+        };
         // Only close for melee when there is no wall between the fish. Keep the route's jumps.
         let clear_attack = ai_in_sword_range(offset)
             && (1..=4).all(|step| !collision_world.solid_at(ai_pos + offset * (step as f32 / 5.0)));
-        if body.is_on_ground && clear_attack && !control.jump_pressed {
+        if body.is_on_ground
+            && clear_attack
+            && !control.jump_pressed
+            && ai.brain.permits_melee_approach()
+        {
             control.move_direction.x = direction * 0.35;
         }
         control.moving = control.move_direction.length_squared() > 0.01;
@@ -486,16 +503,17 @@ fn player_ai_system(
         control.shoot_just_pressed = false;
 
         // Combat runs every frame, including during buffered jumps and recovery.
-        if ai.attack_in <= 0.0
-            && clear_attack
-            && (control.move_direction.x == 0.0 || control.move_direction.x.signum() == direction)
+        let facing_target =
+            control.move_direction.x == 0.0 || control.move_direction.x.signum() == direction;
+        if ai
+            .brain
+            .wants_to_attack(*bot_settings, clear_attack && facing_target, dt, &rng)
         {
             if let Some(sprite) = sprites.get_mut(ai_ent) {
                 sprite.flip_x = direction < 0.0;
             }
             control.shoot_pressed = true;
             control.shoot_just_pressed = true;
-            ai.attack_in = 0.25 + rng.f32() * 0.25;
         }
         *output = control;
         if debug_settings.show_pathfinding_lines {
@@ -530,6 +548,10 @@ mod ai_tests {
         })));
         world.init_resource::<Time>();
         world.init_resource::<GlobalRng>();
+        world.insert_resource(BotSettings {
+            difficulty: BotDifficulty::Hard,
+            personality: BotPersonality::Balanced,
+        });
         world.init_resource::<MatchInputs>();
         let ai_ent = world.run_system(
             |mut entities: ResMut<Entities>,
@@ -550,7 +572,6 @@ mod ai_tests {
                 let ai = AiPlayer {
                     target_player: Some(target),
                     retarget_in: 1.0,
-                    attack_in: 0.0,
                     ..default()
                 };
                 ais.insert(ai_ent, ai);
@@ -558,7 +579,30 @@ mod ai_tests {
             },
             (),
         );
+        world
+            .resource_mut::<Time>()
+            .advance_exact(Duration::from_secs_f32(1.0 / FPS));
         world.run_system(player_ai_system, ());
+        assert!(
+            !world.resource::<MatchInputs>().players[0]
+                .control
+                .shoot_pressed
+        );
+        let mut attacked = false;
+        for _ in 0..180 {
+            world
+                .resource_mut::<Time>()
+                .advance_exact(Duration::from_secs_f32(1.0 / FPS));
+            world.run_system(player_ai_system, ());
+            if world.resource::<MatchInputs>().players[0]
+                .control
+                .shoot_pressed
+            {
+                attacked = true;
+                break;
+            }
+        }
+        assert!(attacked);
         let control = world.resource::<MatchInputs>().players[0].control;
         assert!(control.shoot_pressed);
         assert!(control.shoot_just_pressed);
@@ -848,7 +892,13 @@ fn hydrate_players(
 
         // Handle AI players
         if is_ai {
-            ai_players.insert(player_entity, default());
+            ai_players.insert(
+                player_entity,
+                AiPlayer {
+                    character_personality: meta.bot_personality,
+                    ..default()
+                },
+            );
 
             // Give the player a sword NOTE: It's not good that we're duplicating the sword hydrate
             // functionality here, and this is pretty hacky, but the AI as it stands is temporary

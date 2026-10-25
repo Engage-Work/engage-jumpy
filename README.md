@@ -18,6 +18,29 @@ Player one uses **WASD** to move, **Space** to jump, **J** to fire/use a weapon,
 **K** to grab/throw, **L** to slide, and **F** to ragdoll. Bindings can be changed
 in Settings → Controls. Gamepads and the second keyboard player's bindings are unchanged.
 
+In **Settings → Gameplay**, choose **Easy** or **Hard**, then select bot personalities:
+Mixed, Balanced, Aggressive, Cautious, or Playful. Easy is the default: slower reactions,
+fewer accurate attacks, and deliberate hesitation. Hard keeps strong pursuit and accurate
+combat. Personalities change tactics: aggressive bots rush fights, cautious bots sometimes
+retreat, and playful bots get distracted. Jump and ledge movement keeps the same physics
+on both difficulties.
+
+Remixes can inject defaults in `assets/game.yaml`:
+
+```yaml
+bot_settings:
+  difficulty: Easy
+  personality: Mixed
+```
+
+A fighter's `.player.yaml` can set `bot_personality: Aggressive` (or Balanced, Cautious,
+Playful). Mixed uses these fighter defaults and otherwise assigns a personality per bot.
+An explicit personality chosen in Settings overrides fighter defaults. Saved local choices
+also override a remix's game defaults; Reset in Gameplay removes that override. Settings
+are stored separately from keyboard/audio settings, so existing bindings are preserved.
+These preferences apply through the local match runner; network play does not read local
+bot preferences.
+
 Bots navigate between standable surfaces using full-body Rapier collision checks and the
 shipped fish movement stats. They commit to jumps until landing, align launch positions with
 wall clearance, drop through platforms, and avoid repeatedly attempting a failed transition.

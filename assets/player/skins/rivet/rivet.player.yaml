@@ -1,4 +1,5 @@
 name: Rivet
+bot_personality: Aggressive
 
 sounds:
   jump: ../../sounds/jump.ogg

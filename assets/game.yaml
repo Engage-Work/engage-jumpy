@@ -34,6 +34,10 @@ network:
   local_input_delay: 2
   max_prediction_window: 7
 
+bot_settings:
+  difficulty: Easy
+  personality: Mixed
+
 default_settings:
   main_volume: 1.0
   matchmaking_server: lokmcpce2uzezmh2iq3vf23cbu3grzrct66qcpdfrizmcrrlk5uq

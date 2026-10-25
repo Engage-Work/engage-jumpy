@@ -1,4 +1,5 @@
 name: Pip
+bot_personality: Playful
 
 sounds:
   jump: ../../sounds/jump.ogg
