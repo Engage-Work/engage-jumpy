@@ -9,9 +9,9 @@ background:
         - 1672
         - 941
       depth: 6
-      scale: 1
+      scale: 0.72
       offset:
-        - 0
+        - 560
         - 0
 background_color: rgba(120, 102, 101, 255)
 grid_size:
