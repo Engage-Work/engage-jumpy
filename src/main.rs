@@ -50,6 +50,7 @@ pub struct GameMeta {
     pub plugins: SVec<Handle<LuaPlugin>>,
     pub core: CoreMeta,
     pub default_settings: settings::Settings,
+    pub bot_settings: BotSettings,
     pub localization: Handle<LocalizationAsset>,
     pub theme: ui::UiTheme,
     pub main_menu: ui::main_menu::MainMenuMeta,
@@ -145,6 +146,7 @@ fn main() {
 
     // Register types that we will load from persistent storage.
     settings::Settings::register_schema();
+    BotSettings::register_schema();
 
     // First create bones game.
     let mut game = Game::new();

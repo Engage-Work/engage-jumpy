@@ -5,6 +5,7 @@ use super::*;
 #[repr(C)]
 pub struct PlayerMeta {
     pub name: Ustr,
+    pub bot_personality: BotPersonality,
     pub body_size: Vec2,
     pub slide_body_size: Vec2,
     pub gravity: f32,

@@ -1,4 +1,5 @@
 pub mod attachment;
+pub mod bots;
 pub mod bullet;
 pub mod camera;
 pub mod damage;
@@ -33,10 +34,10 @@ use crate::{prelude::*, settings::PlayerControlMapping};
 
 pub mod prelude {
     pub use super::{
-        attachment::*, bullet::*, camera::*, damage::*, debug::*, editor::*, elements::prelude::*,
-        flappy_jellyfish::*, globals::*, input::*, item::*, lifetime::*, map::*,
-        map_constructor::*, map_pool::*, metadata::*, physics::*, player::*, random::*, scoring::*,
-        utils::*, win_indicator::*, FPS, MAX_PLAYERS,
+        attachment::*, bots::*, bullet::*, camera::*, damage::*, debug::*, editor::*,
+        elements::prelude::*, flappy_jellyfish::*, globals::*, input::*, item::*, lifetime::*,
+        map::*, map_constructor::*, map_pool::*, metadata::*, physics::*, player::*, random::*,
+        scoring::*, utils::*, win_indicator::*, FPS, MAX_PLAYERS,
     };
 }
 
@@ -109,6 +110,7 @@ impl SessionPlugin for MatchPlugin {
         session.world.insert_resource(MatchInputs {
             players: self.player_info,
         });
+        session.world.init_resource::<BotSettings>();
         session.world.insert_resource(self.score);
         session.runner = self.session_runner;
     }
@@ -132,6 +134,14 @@ impl SessionRunner for JumpyDefaultMatchRunner {
         if self.last_run.is_none() {
             world.insert_resource(GlobalRng::for_local_match());
         }
+        // Local preferences never enter the network match runner's deterministic simulation.
+        let bot_settings = {
+            let assets = world.resource::<AssetServer>();
+            let defaults = assets.root::<GameMeta>().bot_settings;
+            let storage = world.resource::<Storage>();
+            BotSettings::resolve(storage.get::<BotSettings>(), defaults)
+        };
+        world.insert_resource(bot_settings);
         let last_run = self.last_run.unwrap_or(frame_start);
         let delta = (frame_start - last_run).as_secs_f64();
 

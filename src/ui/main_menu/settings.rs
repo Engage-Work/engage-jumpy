@@ -5,6 +5,7 @@ use crate::{
 
 mod audio;
 mod controls;
+mod gameplay;
 mod graphics;
 mod networking;
 
@@ -12,6 +13,8 @@ mod networking;
 struct SettingsState {
     tab: SettingsTab,
     modified_settings: Settings,
+    modified_bots: BotSettings,
+    reset_bot_override: bool,
     settings_loaded: bool,
     currently_binding_input_idx: Option<usize>,
 }
@@ -20,6 +23,7 @@ struct SettingsState {
 #[derive(Clone, Copy, PartialEq, Eq, Default)]
 enum SettingsTab {
     #[default]
+    Gameplay,
     Controls,
     Networking,
     Audio,
@@ -28,6 +32,7 @@ enum SettingsTab {
 
 impl SettingsTab {
     const TABS: &'static [(Self, &'static str)] = &[
+        (Self::Gameplay, "gameplay"),
         (Self::Controls, "controls"),
         (Self::Networking, "networking"),
         (Self::Audio, "audio"),
@@ -50,6 +55,8 @@ pub fn widget(
 
     if !state.settings_loaded {
         state.modified_settings = storage.get::<Settings>().unwrap().clone();
+        state.modified_bots = BotSettings::resolve(storage.get::<BotSettings>(), meta.bot_settings);
+        state.reset_bot_override = false;
         state.settings_loaded = true;
     }
 
@@ -133,6 +140,11 @@ pub fn widget(
                             **close_settings_menu = true;
                             // Reset the modified settings to their stored settings.
                             state.modified_settings = storage.get::<Settings>().unwrap().clone();
+                            state.modified_bots = BotSettings::resolve(
+                                storage.get::<BotSettings>(),
+                                meta.bot_settings,
+                            );
+                            state.reset_bot_override = false;
                             // Run cancel callbacks
                             if state.tab == SettingsTab::Audio {
                                 world.run_system(audio::on_cancel, &state);
@@ -167,6 +179,17 @@ pub fn widget(
                             // Save the settings to disk.
                             *mapping = state.modified_settings.player_controls.clone();
                             storage.insert(state.modified_settings.clone());
+                            if state.reset_bot_override {
+                                storage.remove::<BotSettings>();
+                            } else if state.modified_bots
+                                != BotSettings::resolve(
+                                    storage.get::<BotSettings>(),
+                                    meta.bot_settings,
+                                )
+                            {
+                                storage.insert(state.modified_bots);
+                            }
+                            state.reset_bot_override = false;
                             storage.save();
                             **close_settings_menu = true;
                         }
@@ -176,6 +199,9 @@ pub fn widget(
                     ui.add_space(buttons_rect.height() / 2.0);
 
                     ui.vertical(|ui| match state.tab {
+                        SettingsTab::Gameplay => {
+                            world.run_system(gameplay::widget, (ui, &mut state, should_reset))
+                        }
                         SettingsTab::Controls => {
                             world.run_system(controls::widget, (ui, &mut state, should_reset))
                         }
