@@ -23,6 +23,10 @@ main_menu:
     color: FFFFFF
     size: 60
 
+  title_image:
+    image: ui/detroit-title.png
+    image_size: [1774, 887]
+  confirm_sound: audio/detroit/welcome.wav
   background_scale: 0.536
   background_image:
     image: map/resources/detroit-riverfront.png
@@ -295,10 +299,8 @@ core:
   players:
     - ./player/skins/rivet/rivet.player.yaml
     - ./player/skins/pip/pip.player.yaml
-    - ./player/skins/fishy/fishy.player.yaml
-    - ./player/skins/pescy/pescy.player.yaml
-    - ./player/skins/sharky/sharky.player.yaml
-    - ./player/skins/orcy/orcy.player.yaml
+    - ./player/skins/leon/leon.player.yaml
+    - ./player/skins/verse/verse.player.yaml
 
   player_emotes:
     alarm: /player/emotes/alarm.emote.yaml
@@ -328,20 +330,8 @@ core:
 
   stable_maps:
     - /map/levels/detroit-riverfront.map.yaml
-    - /map/levels/level_1.map.yaml
-    - /map/levels/level_2.map.yaml
-    - /map/levels/level_3.map.yaml
-    - /map/levels/level_4.map.yaml
-    - /map/levels/level_5.map.yaml
-    - /map/levels/level_6.map.yaml
-    - /map/levels/level_7.map.yaml
-    - /map/levels/level_8.map.yaml
-    - /map/levels/level_9.map.yaml
-    - /map/levels/level_10.map.yaml
-    - /map/levels/level_11.map.yaml
-    - /map/levels/level_12.map.yaml
-    - /map/levels/level_13.map.yaml
-    - /map/levels/level_14.map.yaml
+    - /map/levels/eastern-market.map.yaml
+    - /map/levels/belle-isle.map.yaml
 
   map_tilesets:
     - /map/resources/default_tileset.atlas.yaml

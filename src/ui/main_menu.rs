@@ -7,8 +7,6 @@ mod map_select;
 pub mod player_select;
 pub(super) mod settings;
 
-// Generate build info.
-
 #[cfg(not(target_arch = "wasm32"))]
 mod network_game;
 
@@ -17,6 +15,8 @@ mod network_game;
 pub struct MainMenuMeta {
     pub title_font: FontMeta,
     pub subtitle_font: FontMeta,
+    pub title_image: Maybe<ImageMeta>,
+    pub confirm_sound: Maybe<Handle<AudioSource>>,
     pub background_image: ImageMeta,
     pub background_scale: f32,
     pub menu_width: f32,
@@ -135,18 +135,41 @@ fn home_menu(
     mut ui: In<&mut egui::Ui>,
     meta: Root<GameMeta>,
     localization: Localization<GameMeta>,
+    textures: Res<EguiTextures>,
+    mut audio: ResMut<AudioCenter>,
 ) {
     let ui = &mut *ui;
     ui.vertical_centered(|ui| {
-        ui.add_space(meta.main_menu.title_font.size / 2.0);
-        ui.label(meta.main_menu.title_font.rich(localization.get("title")));
-        ui.label(
-            meta.main_menu
-                .subtitle_font
-                .rich(localization.get("subtitle")),
-        );
-
-        ui.add_space(meta.main_menu.subtitle_font.size / 2.0);
+        if let Maybe::Set(title) = &meta.main_menu.title_image {
+            let width = ui.available_width().min(470.0);
+            let size = egui::vec2(width, width * title.image_size.y / title.image_size.x);
+            ui.add_space(10.0);
+            let (rect, _) = ui.allocate_exact_size(size, egui::Sense::hover());
+            if let Some(texture) = textures.0.get(&title.image) {
+                ui.painter().image(
+                    *texture,
+                    rect,
+                    egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+                    egui::Color32::WHITE,
+                );
+            }
+            ui.label(
+                meta.theme
+                    .font_styles
+                    .smaller
+                    .rich(localization.get("hometown-tagline")),
+            );
+            ui.add_space(10.0);
+        } else {
+            ui.add_space(meta.main_menu.title_font.size / 2.0);
+            ui.label(meta.main_menu.title_font.rich(localization.get("title")));
+            ui.label(
+                meta.main_menu
+                    .subtitle_font
+                    .rich(localization.get("subtitle")),
+            );
+            ui.add_space(meta.main_menu.subtitle_font.size / 2.0);
+        }
 
         BorderedFrame::new(&meta.theme.panel.border)
             .padding(meta.theme.panel.padding)
@@ -163,6 +186,9 @@ fn home_menu(
                 .focus_by_default(ui)
                 .clicked()
                 {
+                    if let Maybe::Set(sound) = meta.main_menu.confirm_sound {
+                        audio.play_sound(sound, 0.3);
+                    }
                     ui.ctx().set_state(MenuPage::PlayerSelect);
                 }
 

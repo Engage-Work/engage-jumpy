@@ -739,9 +739,12 @@ mod tests {
 
     #[test]
     fn shipped_maps_have_routes_that_work_in_the_game_collision_engine() {
-        for level in 1..=14 {
-            let file = std::fs::read_to_string(format!("assets/map/levels/level_{level}.map.yaml"))
-                .unwrap();
+        let levels = (1..=14)
+            .map(|level| format!("level_{level}"))
+            .chain(["detroit-riverfront", "eastern-market", "belle-isle"].map(String::from));
+        for level in levels {
+            let file =
+                std::fs::read_to_string(format!("assets/map/levels/{level}.map.yaml")).unwrap();
             let yaml: serde_yaml::Value = serde_yaml::from_str(&file).unwrap();
             let mut map = MapMeta {
                 grid_size: uvec2(

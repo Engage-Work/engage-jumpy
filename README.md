@@ -1,12 +1,16 @@
 # Detroit Showdown
 
-A native arena game built with Engage on the Jumpy engine. Select Pip the brass-helmet courier or Rivet the workshop robot in a Detroit D cap, and play Detroit Riverfront against friends or AI opponents.
+A hometown arcade arena game built with Engage on the Jumpy engine. A cream-and-gold pixel wordmark and blue-hour riverfront welcome you with **What up doe!**
+
+Choose Rivet the D-cap workshop robot, Pip the courier, Leon the blue-and-silver lion, or Verse the original battle rapper. Detroit Riverfront, Eastern Market with a Marrow tribute, and Belle Isle Gardens each use a different tested arena layout. The scenery celebrates maintained architecture, food, gardens and neighborhood color; fighting stays in the playful foreground arena.
 
 Build with `cargo build --release --locked`. Run the executable beside the `assets` folder. The macOS app bundle keeps its assets in Contents/Resources and opens directly from Finder.
 
-Choose **Local Game**, press **Space** to join, pick a character with **A/D**, press **Space** to confirm, and add an AI opponent. Continue to select **Detroit Riverfront**. Player one: **A/D** move, **Space** jump, **K** grab/drop, **J** shoot, **L** slide, **F** ragdoll. **Escape** pauses. **F11** switches fullscreen. Controllers are supported.
+Choose **Local Game**, press **Space** to join, pick a character with **A/D**, press **Space** to confirm, and add a bot or a second player. Continue to choose your Detroit arena. Player one: **A/D** move, **Space** jump, **K** grab/drop, **J** shoot/use, **L** slide, **F** ragdoll. **Escape** pauses. **F11** switches fullscreen. Controllers are supported. **Settings → Gameplay** has difficulty and bot personalities; Easy/Mixed is the default.
 
-Original Detroit artwork and Pip/Rivet animation sheets were created with OpenAI Image Generation. The game retains Fish Folk and Spicy Lobster's code, art, audio, credits and licenses. Included Fish Folk media remain CC BY-NC-4.0, so this edition is distributed for noncommercial use.
+The menu chime, lion jump, rapper jump, landing and grab cues are original synthesized sounds. They use the normal effects volume controls. Verse is a fictional battle-rap character, with no sampled recording, copied lyrics or celebrity voice. The Marrow storefront is an artistic neighborhood tribute, not a claim of restaurant endorsement.
+
+Detroit title/landmark artwork and four original animation sheets were created with OpenAI Image Generation. The game retains Fish Folk and Spicy Lobster's code, art, audio, credits and licenses. Included Fish Folk media remain CC BY-NC-4.0, so this edition is distributed for noncommercial use.
 
 ---
 

@@ -1,0 +1,279 @@
+name: Verse
+bot_personality: Cautious
+
+sounds:
+  jump: /audio/detroit/verse-jump.wav
+  jump_volume: 0.05
+  land: /audio/detroit/land.wav
+  land_volume: 0.025
+  grab: /audio/detroit/grab.wav
+  grab_volume: 0.05
+  drop: ../../sounds/drop.ogg
+  drop_volume: 0.05
+
+stats:
+  air_speed: 360
+  accel_air_speed: 60
+  walk_speed: 360
+  accel_walk_speed: 60
+  jump_speed: 660
+  slow_fall_speed: 90
+  slowdown: 48.0
+
+render_scale: 0.28
+body_size: [32, 48]
+slide_body_size: [48, 32]
+gravity: 2160
+
+layers:
+  body:
+    atlas: ./verse-body.atlas.yaml
+    animations:
+      idle:
+        frames:
+          - idx: 0
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 1
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 2
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 3
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 4
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 5
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: true
+      walk:
+        frames:
+          - idx: 6
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 7
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 8
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 9
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 10
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 11
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: true
+      rise:
+        frames:
+          - idx: 12
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      fall:
+        frames:
+          - idx: 13
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      crouch:
+        frames:
+          - idx: 14
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      slide:
+        frames:
+          - idx: 15
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      ragdoll:
+        frames:
+          - idx: 17
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      ragdoll_twitch:
+        frames:
+          - idx: 17
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 12
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      death_spine:
+        frames:
+          - idx: 18
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 19
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 20
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 21
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 22
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 23
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      death_belly:
+        frames:
+          - idx: 18
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 19
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 20
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 21
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 22
+            offset: [0, 0]
+            head_offset: [0, 0]
+          - idx: 23
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+      death_ragdoll:
+        frames:
+          - idx: 23
+            offset: [0, 0]
+            head_offset: [0, 0]
+        fps: 9
+        repeat: false
+  fin:
+    atlas: ./blank.atlas.yaml
+    offset: [0, 0]
+    animations:
+      idle:
+        frames: [0]
+        fps: 9
+        repeat: true
+      walk:
+        frames: [0]
+        fps: 9
+        repeat: true
+      rise:
+        frames: [0]
+        fps: 9
+        repeat: true
+      fall:
+        frames: [0]
+        fps: 9
+        repeat: true
+      crouch:
+        frames: [0]
+        fps: 9
+        repeat: true
+      slide:
+        frames: [0]
+        fps: 9
+        repeat: true
+      ragdoll:
+        frames: [0]
+        fps: 9
+        repeat: true
+      ragdoll_twitch:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_spine:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_belly:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_ragdoll:
+        frames: [0]
+        fps: 9
+        repeat: true
+      grab_1:
+        frames: [0]
+        fps: 9
+        repeat: true
+      grab_2:
+        frames: [0]
+        fps: 9
+        repeat: true
+  face:
+    atlas: ./blank.atlas.yaml
+    offset: [0, 0]
+    animations:
+      idle:
+        frames: [0]
+        fps: 9
+        repeat: true
+      walk:
+        frames: [0]
+        fps: 9
+        repeat: true
+      rise:
+        frames: [0]
+        fps: 9
+        repeat: true
+      fall:
+        frames: [0]
+        fps: 9
+        repeat: true
+      crouch:
+        frames: [0]
+        fps: 9
+        repeat: true
+      slide:
+        frames: [0]
+        fps: 9
+        repeat: true
+      ragdoll:
+        frames: [0]
+        fps: 9
+        repeat: true
+      ragdoll_twitch:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_spine:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_belly:
+        frames: [0]
+        fps: 9
+        repeat: true
+      death_ragdoll:
+        frames: [0]
+        fps: 9
+        repeat: true
+      emote_alarm:
+        frames: [0]
+        fps: 9
+        repeat: true
