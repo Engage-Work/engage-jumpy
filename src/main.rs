@@ -21,6 +21,7 @@ pub mod input;
 pub mod profiler;
 pub mod sessions;
 pub mod settings;
+mod sprite_feet;
 pub mod ui;
 
 mod prelude {
@@ -233,6 +234,7 @@ fn main() {
         preload: true,
     }
     .app()
+    .add_plugins(sprite_feet::FighterFeetPlugin)
     .add_systems(
         bones_bevy_renderer::bevy::app::Startup,
         (app_icon::set_icon, set_edition_title),
