@@ -67,9 +67,9 @@ default_settings:
         left: !Keyboard A
         right: !Keyboard D
       jump: !Keyboard Space
-      grab: !Keyboard V
-      shoot: !Keyboard C
-      slide: !Keyboard B
+      grab: !Keyboard K
+      shoot: !Keyboard J
+      slide: !Keyboard L
       ragdoll: !Keyboard F
       pause: !Keyboard Escape
       menu_back: !Keyboard Escape

@@ -1,3 +1,37 @@
+# Engage Jumpy
+
+Maintained by Engage Work, based on Fish Folk Jumpy v0.12.2. Our maintained branch is `engage`.
+
+Player one uses **WASD** to move, **Space** to jump, **J** to fire/use a weapon,
+**K** to grab/throw, **L** to slide, and **F** to ragdoll. Bindings can be changed
+in Settings → Controls. Gamepads and the second keyboard player's bindings are unchanged.
+
+Bots can attack while jumping, use their sword's reach, retarget living opponents,
+lead moving targets, and recover from blocked ledges. Offline matches use a fresh random seed;
+online simulation keeps the shared deterministic seed needed for synchronization.
+
+This fork stores settings separately under `org.engage-work.jumpy`, so the new defaults
+apply immediately and the original game's settings remain available.
+
+Build and check with the pinned Rust toolchain:
+
+```sh
+cargo test --release --locked
+cargo build --release --locked
+python3 scripts/package-engage.py
+```
+
+The package script writes a native archive and SHA-256 beside it under `target/engage-release/`.
+Its `jumpy-v0.12.2/` directory deliberately preserves Engage's existing managed-app launcher
+layout; the archive and game version identify the Engage release. Keep each published release
+immutable and update Engage's manifest with its URL, SHA-256, and byte count.
+
+Original code licenses and credits are retained. The source is MIT/Apache-2.0; Fish Folk's
+artwork and audio remain **CC BY-NC 4.0**, as described in [LICENSE](LICENSE). This fork does
+not relicense those assets.
+
+---
+
 # Fish Folk: Jumpy
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/fishfolk/jumpy/ci.yml?logo=github&labelColor=1e1c24&color=8bcfcf)](https://github.com/fishfolk/jumpy/actions) [![Documentation](https://img.shields.io/badge/documentation-fishfolk.github.io-green.svg?labelColor=1e1c24&color=f3ee7a)](https://fishfolk.github.io/jumpy/book) [![License](https://img.shields.io/badge/License-MIT%20or%20Apache%202-green.svg?label=license&labelColor=1e1c24&color=34925e)](./LICENSE) [![Discord](https://img.shields.io/badge/chat-on%20discord-green.svg?logo=discord&logoColor=fff&labelColor=1e1c24&color=8d5b3f)](https://discord.gg/4smxjcheE5)

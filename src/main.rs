@@ -202,7 +202,7 @@ fn main() {
             env!("CARGO_PKG_VERSION_MINOR").parse().unwrap(),
             env!("CARGO_PKG_VERSION_PATCH").parse().unwrap(),
         ),
-        app_namespace: ("org".into(), "fishfolk".into(), "jumpy".into()),
+        app_namespace: ("org".into(), "engage-work".into(), "jumpy".into()),
         asset_dir: std::env::var("JUMPY_ASSETS")
             .unwrap_or_else(|_| "assets".into())
             .into(),

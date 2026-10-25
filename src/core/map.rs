@@ -449,7 +449,7 @@ fn create_nav_graph(meta: &MapMeta) -> Arc<NavGraphInner> {
                 // Jump staight up
                 graph.add_edge(
                     node,
-                    above2,
+                    above3,
                     NavGraphEdge {
                         inputs: [PlayerControl {
                             jump_just_pressed: true,
@@ -460,6 +460,33 @@ fn create_nav_graph(meta: &MapMeta) -> Arc<NavGraphInner> {
                         distance: node.distance(&above3),
                     },
                 );
+            }
+
+            // Short ledges need their own edges; long jumps can overshoot them entirely.
+            for direction in [-1, 1] {
+                for height in 1..=2 {
+                    let landing = NavNode(node.0 + ivec2(direction, height));
+                    if (1..=height).all(|y| graph.contains_node(NavNode(node.0 + ivec2(0, y))))
+                        && graph.contains_node(landing)
+                        && is_solid!(landing.below())
+                    {
+                        graph.add_edge(
+                            node,
+                            landing,
+                            NavGraphEdge {
+                                inputs: std::iter::repeat(PlayerControl {
+                                    move_direction: vec2(direction as f32, 0.0),
+                                    jump_just_pressed: true,
+                                    jump_pressed: true,
+                                    ..default()
+                                })
+                                .take(12)
+                                .collect(),
+                                distance: node.distance(&landing),
+                            },
+                        );
+                    }
+                }
             }
 
             // Jump up and left
@@ -751,4 +778,39 @@ fn create_nav_graph(meta: &MapMeta) -> Arc<NavGraphInner> {
     }
 
     Arc::new(graph)
+}
+
+#[cfg(test)]
+mod navigation_tests {
+    use super::*;
+
+    #[test]
+    fn navigation_reaches_short_ledges_and_full_jump_height() {
+        let mut map = MapMeta {
+            grid_size: uvec2(8, 8),
+            tile_size: vec2(16.0, 16.0),
+            ..default()
+        };
+        let mut layer = MapLayerMeta::default();
+        for x in 0..8 {
+            layer.tiles.push(MapTileMeta {
+                pos: uvec2(x, 0),
+                collision: TileCollisionKind::Solid,
+                ..default()
+            });
+        }
+        layer.tiles.push(MapTileMeta {
+            pos: uvec2(3, 1),
+            collision: TileCollisionKind::Solid,
+            ..default()
+        });
+        map.layers.push(layer);
+        let graph = create_nav_graph(&map);
+        let start = NavNode(ivec2(2, 1));
+        assert!(graph.edge_weight(start, NavNode(ivec2(2, 4))).is_some());
+        let ledge = graph.edge_weight(start, NavNode(ivec2(3, 2))).unwrap();
+        assert!(ledge.inputs.front().unwrap().jump_pressed);
+        assert!(ledge.inputs.front().unwrap().move_direction.x > 0.0);
+        assert!(!graph.contains_node(NavNode(ivec2(3, 1))));
+    }
 }

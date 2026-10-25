@@ -22,6 +22,12 @@ pub fn plugin(session: &mut Session) {
 #[type_data(SchemaLuaEcsRefMetatable(lua_metatable))]
 pub struct GlobalRng(AtomicRng);
 
+impl GlobalRng {
+    pub fn for_local_match() -> Self {
+        Self(AtomicRng::new())
+    }
+}
+
 impl Default for GlobalRng {
     fn default() -> Self {
         Self(AtomicRng::with_seed(7))

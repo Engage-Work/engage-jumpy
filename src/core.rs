@@ -127,6 +127,10 @@ pub struct JumpyDefaultMatchRunner {
 impl SessionRunner for JumpyDefaultMatchRunner {
     fn step(&mut self, frame_start: Instant, world: &mut World, stages: &mut SystemStages) {
         pub const STEP: f64 = 1.0 / FPS as f64;
+        // Offline matches can vary their seed; network matches must share deterministic RNG.
+        if self.last_run.is_none() {
+            world.insert_resource(GlobalRng::for_local_match());
+        }
         let last_run = self.last_run.unwrap_or(frame_start);
         let delta = (frame_start - last_run).as_secs_f64();
 
